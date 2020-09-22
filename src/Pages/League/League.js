@@ -67,12 +67,12 @@ class League extends React.Component {
     render() {
         let id = this.props.match.params.internalLeagueId;
         return (
-            <div style={{ width: "100%", height: 600 }}>
-                <div className="p-grid p-align-center" style={{ marginTop: 25, marginLeft: 50, marginRight: 50, padding: 0, cursor: "pointer" }}>
-                    <div onClick={() => {this.nextPath(`/League/${id}/info`)}} className="hover-div hover-div-text card-item p-col p-shadow-10" style={{ textAlign: "center", display: "flex", alignItems: "center", justifyContent: 'center', minHeight: 200 }}>
-                        <h2 style={{ padding: 0, height: "100%" }}>{"League Overview"}</h2>
+            <div style={{height: 500}}>
+                <div className="p-grid p-align-center" style={{cursor: "pointer", height: "80%"}}>
+                    <div onClick={() => {this.nextPath(`/League/${id}/info`)}} className="hover-div hover-div-text card-item p-col p-shadow-10" style={{ textAlign: "center", display: "flex", alignItems: "center", justifyContent: 'center', height: "80%" }}>
+                        <h2 style={{ padding: 0 }}>{"League Overview"}</h2>
                     </div>
-                    <div className="card-item p-col p-shadow-10" style={{ width: "100%", minHeight: 200 }}>
+                    <div className="card-item p-col p-shadow-10" style={{ width: "100%", height: "80%" }}>
                         <div className="p-grid p-align-center">
                             <div className="p-col">
                                 <h2>Season Overview</h2>
@@ -83,7 +83,7 @@ class League extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="p-grid p-align-center" style={{ marginTop: 0, marginLeft: 125, marginRight: 125, paddingRight: 300, paddingLeft: 300, cursor: "pointer" }}>
+                <div className="p-grid p-align-center" style={{cursor: "pointer" }}>
                     <div className="card-item p-col p-shadow-10" style={{ width: "60%" }}>
                         <div className="p-grid p-align-center">
                             <div className="p-col">

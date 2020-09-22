@@ -1,20 +1,13 @@
 import React from "react";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { MegaMenu } from "primereact/megamenu";
-import { TieredMenu } from "primereact/tieredmenu";
-import { Card } from "primereact/card";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-import leagueInfo from "../data/league/LeagueInfoData";
 import leagues from "../data/league/LeaguesData";
 import "./LeagueSelector.css";
-import {Link} from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
-
+import Zoom from 'react-reveal/Zoom'
 class LeagueSelector extends React.Component {
 
   currentYear = 2020;
@@ -30,8 +23,8 @@ class LeagueSelector extends React.Component {
     debugger;
     info.forEach((element) => {
       let item = (
-        <div className="hover-div p-col p-shadow-10" style={{ margin: 100, padding:0, cursor: "pointer" }} onClick={() => this.nextPath(`/League/${element.internalId}`)}>
-          <div style={{ textAlign: "center", width:"100%", height:"100%", padding:100 }} className="hover-div-text">
+        <div className="hover-div p-col p-shadow-10" style={{ margin: 25, padding:0, cursor: "pointer" }} onClick={() => this.nextPath(`/League/${element.internalId}`)}>
+          <div style={{display:"flex", alignItems:"center", textAlign: "center", justifyContent: "center", width:"100%", height:350}} className="hover-div-text">
             <h1>{element.name}</h1>
           </div>
         </div>
@@ -43,11 +36,15 @@ class LeagueSelector extends React.Component {
 
   render() {
     return (
-      <div style={{ width: "100%", margin: 0, padding: 0, height: 600 }}>
-        <div className="p-grid p-align-center">
-          {this.ReadAllLeagueInfo()}
-        </div>
+      <div style={{width: "80%"}}>
+        <Zoom duration={2000}>
+          <div className="p-grid p-align-center">
+            {this.ReadAllLeagueInfo()}
+          </div>
+        </Zoom>
+        
       </div>
+      
     );
   }
 }
