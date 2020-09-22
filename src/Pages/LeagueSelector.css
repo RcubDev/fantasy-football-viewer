@@ -1,9 +1,9 @@
-.test:hover {
+.hover-div:hover {
   background-position: left bottom;
   
 }
 
-.test {
+.hover-div {
   border: 1px solid black;
   border-radius: 3px;
   display: block;
@@ -14,11 +14,11 @@
   transition: all 0.5s ease-out;
 }
 
-.text:hover {
+.hover-div-text:hover {
   color: white;
 }
 
-.text {
+.hover-div-text {
   text-align: center;
   font-size: 16px;
   line-height: 30px;

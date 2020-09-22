@@ -8,37 +8,37 @@ import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-import leagueInfo from "../data/league/LeagueInfo";
-import "./LeagueSelector.css"
-import {Link} from 'react-router-dom'
-import { withRouter } from 'react-router-dom'
-
+import leagueInfo from "../data/league/LeagueInfoData";
+import leagues from "../data/league/LeaguesData";
+import "./LeagueSelector.css";
+import {Link} from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import _ from 'lodash';
 
 class LeagueSelector extends React.Component {
-  leagueIds = ["528423", "516886"];
+
   currentYear = 2020;
   //data = require('./data/league/516886/2020/516886-league-info.json');
 
   nextPath(path) {
-    debugger;
     this.props.history.push(path);
   }
 
   ReadAllLeagueInfo() {
-    let leagues = [];
-    let info = leagueInfo;
+    let leaguesGrid = [];
+    let info = _.uniqBy(leagues, 'internalId');
+    debugger;
     info.forEach((element) => {
       let item = (
-        <div className="test p-col p-shadow-10" style={{ margin: 100, padding:0, cursor: "pointer" }} onClick={() => this.nextPath(`/League/${element.league_id}`)}>
-          <div style={{ textAlign: "center", width:"100%", height:"100%", padding:100 }} className="text">
+        <div className="hover-div p-col p-shadow-10" style={{ margin: 100, padding:0, cursor: "pointer" }} onClick={() => this.nextPath(`/League/${element.internalId}`)}>
+          <div style={{ textAlign: "center", width:"100%", height:"100%", padding:100 }} className="hover-div-text">
             <h1>{element.name}</h1>
-            <label>League ID: {element.league_id}</label>
           </div>
         </div>
       );
-      leagues.push(item);
+      leaguesGrid.push(item);
     });
-    return leagues;
+    return leaguesGrid;
   }
 
   render() {

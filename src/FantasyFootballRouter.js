@@ -7,7 +7,7 @@ function FantasyFootballRouter() {
   return (
     <Router>
       <Switch>
-        <Route path="/League/:league_id">
+        <Route path="/League/:internalLeagueId">
             <League></League>
         </Route>
         <Route path="/">
