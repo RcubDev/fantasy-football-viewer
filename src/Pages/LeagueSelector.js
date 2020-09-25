@@ -8,6 +8,7 @@ import "./LeagueSelector.css";
 import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
 import Zoom from 'react-reveal/Zoom'
+
 class LeagueSelector extends React.Component {
 
   currentYear = 2020;
@@ -20,7 +21,6 @@ class LeagueSelector extends React.Component {
   ReadAllLeagueInfo() {
     let leaguesGrid = [];
     let info = _.uniqBy(leagues, 'internalId');
-    debugger;
     info.forEach((element) => {
       let item = (
         <div className="hover-div p-col p-shadow-10" style={{ margin: 25, padding:0, cursor: "pointer" }} onClick={() => this.nextPath(`/League/${element.internalId}`)}>
@@ -36,13 +36,11 @@ class LeagueSelector extends React.Component {
 
   render() {
     return (
-      <div style={{width: "80%"}}>
-        <Zoom duration={2000}>
-          <div className="p-grid p-align-center">
+      <div style={{display: "flex",
+        justifyContent: "center"}}>
+          <div className="p-grid p-align-center" style={{width: "80%"}}>
             {this.ReadAllLeagueInfo()}
-          </div>
-        </Zoom>
-        
+          </div>        
       </div>
       
     );
