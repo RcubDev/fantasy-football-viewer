@@ -11,7 +11,7 @@ class PointsFor extends React.Component {
   constructor(props) {
     super();
     this.state = {
-      singleWeek: false,
+      viewType: "seasontotal",
       sortBy: "asc", //desc
       maxNumManagers: 15,
     };
@@ -27,26 +27,28 @@ class PointsFor extends React.Component {
   ];
 
   viewOptions = [
-    { name: "Season long", code: false },
-    { name: "Week by week", code: true },
+    { name: "Season total", code: "seasontotal" },
+    { name: "Week by week", code: "weekbyweek" },
+    { name: "Top weeks", code: "topweeks" },
   ];
 
   render() {
     let pointsForData = GetTopPointsFor(
-      this.state.singleWeek,
+      this.state.viewType,
       this.state.maxNumManagers,
       this.state.sortBy,
       this.props.stats
     );
 
     let labels = [];
-    if (this.state.singleWeek) {
+    if (this.state.viewType === "topweeks") {
       for (let i = 0; i < this.state.maxNumManagers; i++) {
-        labels.push(`#${i + 1} - ${pointsForData[i].managerName}`);
+        labels.push(JSON.stringify(pointsForData[i]));
+        // labels.push(`#${i + 1} - ${pointsForData[i].managerName}`);
       }
     } else {
       for (let i = 0; i < pointsForData.length; i++) {
-        labels.push(`${i + 1} - ${pointsForData[i].managerName}`);
+        labels.push(JSON.stringify(pointsForData[i]));
       }
     }
 
@@ -77,24 +79,53 @@ class PointsFor extends React.Component {
     };
 
     let basicOptions = {
+      tooltips: {
+        callbacks: {
+          label: function (tooltipItem, data) {
+            console.log(tooltipItem);
+            var label = data.datasets[tooltipItem.datasetIndex].label || "";
+            let item = JSON.parse(tooltipItem.label);
+            console.log(item);
+            return [
+              `Points Scored: ${item.pointsScored}`,
+            ];
+          },
+          afterBody: function (tooltipItem, data) {
+            let item = JSON.parse(tooltipItem[0].label);
+            console.log(item);
+            let bodyItems = [];
+            bodyItems.push(`\t\t\t Manager: ${item.managerName}`);
+            if(item.week !== "-1") {
+                bodyItems.push(`\t\t\t Week: ${item.week}`);
+            }
+            return bodyItems;
+          },
+          title: function(tooltipItem, data) {
+              return "";
+          }
+        },
+      },
       maintainAspectRation: false,
       title: {
         display: true,
         text: this.state.singleWeek
           ? "Top Points Scored (In a single week)"
-          : "Top Points For (Season total)",
+          : "Top Points Scored (Season total)",
         fontSize: 16,
       },
       legend: {
-        labels: {
-          fontColor: "#495057",
-        },
+        display: false,
       },
       scales: {
         xAxes: [
           {
             ticks: {
               fontColor: "#495057",
+              callback: function (value, index, values) {
+                let item = null;
+                item = JSON.parse(value);
+                return `${index + 1} - ${item.managerName}`;
+              },
             },
           },
         ],
@@ -105,23 +136,18 @@ class PointsFor extends React.Component {
             },
           },
         ],
-      }
+      },
     };
 
     let singleWeekFilterControls = [];
-    if (this.state.singleWeek) {
+    if (this.state.viewType === "topweeks") {
       singleWeekFilterControls = (
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <span className="p-float-label" style={{ margin: 20 }}>        
-          <InputNumber onValueChange={(e) => this.setState({maxNumManagers: e.value})} value={this.state.maxNumManagers}></InputNumber>
-
-            {/* <InputText
-              id="managerCount"
+          <span className="p-float-label" style={{ margin: 20 }}>
+            <InputNumber
+              onValueChange={(e) => this.setState({ maxNumManagers: e.value })}
               value={this.state.maxNumManagers}
-              onChange={(e) =>
-                this.setState({ maxNumManagers: e.target.value })
-              }
-            /> */}
+            ></InputNumber>
             <label htmlFor="managerCount"># of weeks</label>
           </span>
 
@@ -152,8 +178,16 @@ class PointsFor extends React.Component {
             optionLabel="name"
             optionValue="code"
             options={this.viewOptions}
-            value={this.state.singleWeek}
-            onChange={(e) => this.setState({ singleWeek: e.value })}
+            value={this.state.viewType}
+            onChange={
+                (e) => {
+                    let sortBy = this.state.sortBy;
+                    if(e.value === "seasontotal") {
+                        sortBy = "asc";
+                    }
+                    this.setState({ viewType: e.value, sortBy });
+                }
+            }
             style={{ padding: 20 }}
           />
           {singleWeekFilterControls}

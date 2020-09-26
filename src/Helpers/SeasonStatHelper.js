@@ -2,10 +2,31 @@
 //maxNumManagers: maxNumber of managers
 //sortBy = "asc" or "desc"
 
-export const GetTopPointsFor = (isWeekly, maxNumManagers, sortBy, stats) => {
-    
+function Test(callBack, viewType, maxNumManagers, sortBy, stats) {
+  stats.forEach((week) => {
+    let matchups = week.data.matchups;
+    if (matchups) {
+      matchups.forEach((matchup) => {
+        matchup.matchup.teams.forEach((team) => {
+          let managerData = { ...team.team.managers.manager };
+          if (managerData.nickname === "--hidden--") {
+            managerData.nickname = team.team.name;
+          }
+          callback(maxNumManagers,
+            sortBy,
+            pointScorers,
+            managerData,
+            parseInt(team.team.team_points.total),
+            week.data.week);
+        });
+      });
+    }
+  });
+}
+
+export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
   let pointScorers = [];
-  if (isWeekly) {
+  if (viewType === "topweeks") {
     stats.forEach((week) => {
       let matchups = week.data.matchups;
       if (matchups) {
@@ -27,7 +48,7 @@ export const GetTopPointsFor = (isWeekly, maxNumManagers, sortBy, stats) => {
         });
       }
     });
-  } else {
+  } else if (viewType === "seasontotal") {
     //SETUP SEASON TOTAL VIEW.
 
     let scoresDictionary = {};
@@ -44,7 +65,7 @@ export const GetTopPointsFor = (isWeekly, maxNumManagers, sortBy, stats) => {
               pointsScored: parseInt(team.team.team_points.total),
               managerGUID: managerData.guid,
               managerName: managerData.nickname,
-              week: week.data.week,
+              week: "-1",
             };
             if (scoresDictionary[newScore.managerGUID]) {
               scoresDictionary[newScore.managerGUID].pointsScored +=
@@ -59,7 +80,6 @@ export const GetTopPointsFor = (isWeekly, maxNumManagers, sortBy, stats) => {
     pointScorers = Object.values(scoresDictionary);
     pointScorers = sortScores(sortBy, pointScorers);
   }
-  console.log(pointScorers);
   return pointScorers;
 };
 
