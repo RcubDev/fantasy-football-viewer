@@ -2,7 +2,9 @@
 //maxNumManagers: maxNumber of managers
 //sortBy = "asc" or "desc"
 
-function Test(callBack, viewType, maxNumManagers, sortBy, stats) {
+function LoopMatchups(callBack, maxNumManagers, sortBy, stats) {
+  let pointScorers = [];
+
   stats.forEach((week) => {
     let matchups = week.data.matchups;
     if (matchups) {
@@ -12,42 +14,30 @@ function Test(callBack, viewType, maxNumManagers, sortBy, stats) {
           if (managerData.nickname === "--hidden--") {
             managerData.nickname = team.team.name;
           }
-          callback(maxNumManagers,
+          pointScorers = callBack(
+            maxNumManagers,
             sortBy,
             pointScorers,
             managerData,
             parseInt(team.team.team_points.total),
-            week.data.week);
+            week.data.week
+          );
         });
       });
     }
   });
+  return pointScorers;
 }
 
 export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
   let pointScorers = [];
   if (viewType === "topweeks") {
-    stats.forEach((week) => {
-      let matchups = week.data.matchups;
-      if (matchups) {
-        matchups.forEach((matchup) => {
-          matchup.matchup.teams.forEach((team) => {
-            let managerData = { ...team.team.managers.manager };
-            if (managerData.nickname === "--hidden--") {
-              managerData.nickname = team.team.name;
-            }
-            pointScorers = CalculateTopSingleWeekPointsFor(
-              maxNumManagers,
-              sortBy,
-              pointScorers,
-              managerData,
-              parseInt(team.team.team_points.total),
-              week.data.week
-            );
-          });
-        });
-      }
-    });
+    pointScorers = LoopMatchups(
+      CalculateTopSingleWeekPointsFor,
+      maxNumManagers,
+      sortBy,
+      stats
+    );
   } else if (viewType === "seasontotal") {
     //SETUP SEASON TOTAL VIEW.
 
@@ -79,9 +69,39 @@ export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
     });
     pointScorers = Object.values(scoresDictionary);
     pointScorers = sortScores(sortBy, pointScorers);
+  } else if (viewType === "weekbyweek") {
+    pointScorers = LoopMatchups(CalculateWeeklyScores, maxNumManagers, sortBy, stats);
+    console.log(pointScorers);
   }
   return pointScorers;
 };
+
+function CalculateWeeklyScores(
+  maxNumManagers,
+  sortBy,
+  pointScorers,
+  teamManager,
+  teamPoints,
+  weekNumber
+) {
+    let newPointScorer = {
+        pointsScored: teamPoints,
+        managerGUID: teamManager.guid,
+        managerName: teamManager.nickname,
+        week: weekNumber,
+      };
+      debugger;
+    if(pointScorers[parseInt(weekNumber) - 1]) {
+        pointScorers[parseInt(weekNumber) - 1].data.push(newPointScorer);
+    }
+    else{
+        pointScorers.push({
+            week: parseInt(weekNumber),
+            data: [newPointScorer]
+        })
+    }
+    return pointScorers;
+}
 
 function CalculateTopSingleWeekPointsFor(
   maxNumManagers,
@@ -143,11 +163,3 @@ function sortScores(sortBy, pointScorers) {
   }
   return pointScorers;
 }
-
-function CalculateTopSeasonScorer(
-  maxNumManagers,
-  sortBy,
-  pointScorers,
-  teamManager,
-  teamPoints
-) {}

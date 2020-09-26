@@ -46,11 +46,14 @@ class PointsFor extends React.Component {
         labels.push(JSON.stringify(pointsForData[i]));
         // labels.push(`#${i + 1} - ${pointsForData[i].managerName}`);
       }
-    } else {
+    } else if(this.state.viewType === "seasontotal") {
       for (let i = 0; i < pointsForData.length; i++) {
         labels.push(JSON.stringify(pointsForData[i]));
       }
     }
+    // else if(this.state.viewType === "weekbyweek") {
+    //     for(let i = 0; i < pointsForData.length)
+    // }
 
     let colorCopy = [...colors];
     let backgroundColors = {};
@@ -64,6 +67,8 @@ class PointsFor extends React.Component {
         backgroundColors[pointsForData[i].managerGUID] = color;
       }
     }
+    
+    let chartDataSets = [];
 
     let chartData = {
       labels: labels,
@@ -81,18 +86,15 @@ class PointsFor extends React.Component {
     let basicOptions = {
       tooltips: {
         callbacks: {
-          label: function (tooltipItem, data) {
-            console.log(tooltipItem);
+          label: function (tooltipItem, data) {            
             var label = data.datasets[tooltipItem.datasetIndex].label || "";
             let item = JSON.parse(tooltipItem.label);
-            console.log(item);
             return [
               `Points Scored: ${item.pointsScored}`,
             ];
           },
           afterBody: function (tooltipItem, data) {
             let item = JSON.parse(tooltipItem[0].label);
-            console.log(item);
             let bodyItems = [];
             bodyItems.push(`\t\t\t Manager: ${item.managerName}`);
             if(item.week !== "-1") {
