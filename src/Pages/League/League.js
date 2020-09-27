@@ -58,7 +58,7 @@ class League extends React.Component {
             id={internalLeagueId + element.season + "Button"}
             onClick={() =>
               this.nextPath(
-                `/League/${internalLeagueId}/Seasons/${element.league_id}`
+                `/League/${internalLeagueId}/Seasons/${element.league_id}/View/none`
               )
             }
           ></Button>
