@@ -1,5 +1,6 @@
 import React from "react";
 import { GetTopPointsFor } from "../../Helpers/SeasonStatHelper";
+import { getChartColors } from '../../Helpers/ChartColorHelper';
 import { Chart } from "primereact/chart";
 import colors from "../../Constants/ChartColors";
 import _ from "lodash";
@@ -17,9 +18,11 @@ class PointsFor extends React.Component {
     };
   }
 
-  getRandomInt(max) {
+
+ getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }
+
 
   sortOptions = [
     { name: "ASC", code: "asc" },
@@ -35,29 +38,16 @@ class PointsFor extends React.Component {
   getChartColors(pointsForData) {
     let backgroundColors = {};
     let colorCopy = [...colors];
-    if (this.state.viewType === "weekbyweek") {
-      for (let i = 0; i < pointsForData[0].data.length; i++) {
-        if (!backgroundColors[pointsForData[0].data[i].managerGUID]) {
-          let indexToRemove = this.getRandomInt(colorCopy.length - 1);
-          let color = colorCopy[indexToRemove];
-          colorCopy = _.remove(colorCopy, function (x, y) {
-            return y !== indexToRemove;
-          });
-          backgroundColors[pointsForData[0].data[i].managerGUID] = color;
-        }
-      }
-    } else {
-      for (let i = 0; i < pointsForData.length; i++) {
-        if (!backgroundColors[pointsForData[i].managerGUID]) {
-          let indexToRemove = this.getRandomInt(colorCopy.length - 1);
-          let color = colorCopy[indexToRemove];
-          colorCopy = _.remove(colorCopy, function (x, y) {
-            return y !== indexToRemove;
-          });
-          backgroundColors[pointsForData[i].managerGUID] = color;
-        }
-      }
+    let managers = [];
+    if(this.state.viewType === "weekbyweek") {
+      managers = pointsForData[0].data.map(x => x.managerGUID);
     }
+    else{
+      managers = pointsForData.map(x => x.managerGUID);
+    }    
+
+    backgroundColors = getChartColors(pointsForData, managers);
+    
 
     return backgroundColors;
   }
@@ -86,7 +76,7 @@ class PointsFor extends React.Component {
       datasets = [
         {
           label: "Points Scored",
-          data: pointsForData.map((x) => x.pointsScored),
+          data: pointsForData.map((x) => x.points),
           backgroundColor: pointsForData.map(
             (x) => backgroundColors[x.managerGUID]
           ),
@@ -108,14 +98,14 @@ class PointsFor extends React.Component {
               data: [
                 pointsForData[k].data.find(
                   (x) => x.managerName === managers[i].managerName
-                ).pointsScored,
+                ).points,
               ],
               backgroundColor: backgroundColors[managers[i].managerGUID],
             });
           } else {
             let pointsScored = pointsForData[k].data.find(
               (x) => x.managerName === managers[i].managerName
-            )?.pointsScored;
+            )?.points;
             if (pointsScored) {
               dataPoints
                 .find((x) => x.label === managers[i].managerName)
@@ -127,7 +117,7 @@ class PointsFor extends React.Component {
             }
           }
         }
-      }
+      }      
       datasets = dataPoints;
     }
     return datasets;
@@ -162,7 +152,7 @@ class PointsFor extends React.Component {
     if (this.state.viewType === "weekbyweek") {
       for (let i = 0; i < pointsForData.length; i++) {
         pointsForData[i].data = pointsForData[i].data.sort((x, y) =>
-          x.pointsScored < y.pointsScored ? 1 : -1
+          x.points < y.points ? 1 : -1
         );
       }
     }
@@ -287,7 +277,7 @@ class PointsFor extends React.Component {
       basicOptions.tooltips.label = function (tooltipItem, data) {
         var label = data.datasets[tooltipItem.datasetIndex].label || "";
         let item = JSON.parse(tooltipItem.label);
-        return [`Points Scored: ${item.pointsScored}`];
+        return [`Points Scored: ${item.points}`];
       };
 
       basicOptions.tooltips.afterBody = function (tooltipItem, data) {

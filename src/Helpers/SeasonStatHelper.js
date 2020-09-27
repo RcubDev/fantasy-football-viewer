@@ -19,10 +19,28 @@ function LoopMatchups(callBack, maxNumManagers, sortBy, stats) {
             sortBy,
             pointScorers,
             managerData,
-            parseInt(team.team.team_points.total),
+            parseFloat(team.team.team_points.total),
             week.data.week
           );
         });
+      });
+    }
+  });
+  return pointScorers;
+}
+
+function LoopMatchupsPassMatchupTeams(callBack, maxNumManagers, sortBy, stats) {
+  let pointScorers = [];
+  stats.forEach((week) => {
+    let matchups = week.data.matchups;
+    if (matchups.length > 0) {
+      matchups.forEach((matchup) => {
+        pointScorers = callBack(
+          maxNumManagers,
+          sortBy,
+          pointScorers,
+          matchup.matchup.teams
+        );
       });
     }
   });
@@ -42,7 +60,6 @@ export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
     //SETUP SEASON TOTAL VIEW.
 
     let scoresDictionary = {};
-    debugger;
     stats.forEach((week) => {
       let matchups = week.data.matchups;
       if (matchups.length > 0) {
@@ -52,15 +69,16 @@ export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
             if (managerData.nickname === "--hidden--") {
               managerData.nickname = team.team.name;
             }
+            debugger;
             let newScore = {
-              pointsScored: parseInt(team.team.team_points.total),
+              points: +parseFloat(team.team.team_points.total),
               managerGUID: managerData.guid,
               managerName: managerData.nickname,
               week: "-1",
             };
             if (scoresDictionary[newScore.managerGUID]) {
-              scoresDictionary[newScore.managerGUID].pointsScored +=
-                newScore.pointsScored;
+              scoresDictionary[newScore.managerGUID].points +=
+                newScore.points;
             } else {
               scoresDictionary[newScore.managerGUID] = newScore;
             }
@@ -70,9 +88,14 @@ export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
     });
     pointScorers = Object.values(scoresDictionary);
     pointScorers = sortScores(sortBy, pointScorers);
+    pointScorers = pointScorers.map(x => ({...x, points: +x.points.toFixed(2)}));
   } else if (viewType === "weekbyweek") {
-    pointScorers = LoopMatchups(CalculateWeeklyScores, maxNumManagers, sortBy, stats);
-    console.log(pointScorers);
+    pointScorers = LoopMatchups(
+      CalculateWeeklyScores,
+      maxNumManagers,
+      sortBy,
+      stats
+    );
   }
   return pointScorers;
 };
@@ -85,22 +108,21 @@ function CalculateWeeklyScores(
   teamPoints,
   weekNumber
 ) {
-    let newPointScorer = {
-        pointsScored: teamPoints,
-        managerGUID: teamManager.guid,
-        managerName: teamManager.nickname,
-        week: weekNumber,
-      };
-    if(pointScorers[parseInt(weekNumber) - 1]) {
-        pointScorers[parseInt(weekNumber) - 1].data.push(newPointScorer);
-    }
-    else{
-        pointScorers.push({
-            week: parseInt(weekNumber),
-            data: [newPointScorer]
-        })
-    }        
-    return pointScorers;
+  let newPointScorer = {
+    points: teamPoints,
+    managerGUID: teamManager.guid,
+    managerName: teamManager.nickname,
+    week: weekNumber,
+  };
+  if (pointScorers[parseInt(weekNumber) - 1]) {
+    pointScorers[parseInt(weekNumber) - 1].data.push(newPointScorer);
+  } else {
+    pointScorers.push({
+      week: parseInt(weekNumber),
+      data: [newPointScorer],
+    });
+  }
+  return pointScorers;
 }
 
 function CalculateTopSingleWeekPointsFor(
@@ -112,7 +134,7 @@ function CalculateTopSingleWeekPointsFor(
   weekNumber
 ) {
   let newPointScorer = {
-    pointsScored: teamPoints,
+    points: teamPoints,
     managerGUID: teamManager.guid,
     managerName: teamManager.nickname,
     week: weekNumber,
@@ -121,45 +143,87 @@ function CalculateTopSingleWeekPointsFor(
   if (pointScorers.length < maxNumManagers) {
     pointScorers.push(newPointScorer);
     newScorerAdded = true;
-  } else {
+  } else if(newPointScorer.points > 0) {
     //   pointScorers.pop();
     if (sortBy === "asc") {
       if (
-        pointScorers[pointScorers.length - 1].pointsScored <
-        newPointScorer.pointsScored
+        pointScorers[pointScorers.length - 1].points <
+        newPointScorer.points
       ) {
         pointScorers.pop();
         pointScorers.push(newPointScorer);
         newScorerAdded = true;
       }
     } else if (sortBy === "desc") {
-      if (
-        pointScorers[pointScorers.length - 1].pointsScored >
-        newPointScorer.pointsScored
-      ) {
+      if (pointScorers[pointScorers.length - 1].points > newPointScorer.points) {
         pointScorers.pop();
         pointScorers.push(newPointScorer);
         newScorerAdded = true;
       }
     }
   }
-
   if (newScorerAdded) {
     pointScorers = sortScores(sortBy, pointScorers);
+    console.log(pointScorers);
   }
-
   return pointScorers;
 }
 
 function sortScores(sortBy, pointScorers) {
   if (sortBy === "asc") {
     pointScorers = pointScorers.sort((x, y) =>
-      x.pointsScored < y.pointsScored ? 1 : -1
+      x.points < y.points ? 1 : -1
     );
   } else if (sortBy === "desc") {
     pointScorers = pointScorers.sort((x, y) =>
-      x.pointsScored > y.pointsScored ? 1 : -1
+      x.points > y.points ? 1 : -1
     );
   }
+  return pointScorers;
+}
+
+export const GetTopPointsAgainst = (
+  viewType,
+  maxNumManagers,
+  sortBy,
+  stats
+) => {
+  return LoopMatchupsPassMatchupTeams(GetPointsAgainstSeason, maxNumManagers, sortBy, stats);
+};
+
+function GetPointsAgainstSeason(maxNumManagers, sortBy, pointScorers, teams) {
+  //ALL MATCHUPS SHOULD HAVE 2 TEAMS ONLY.
+  let team1 = teams[0].team;
+  let team2 = teams[1].team;
+
+  let matchupData = [
+    {
+      points: +(team1.team_points.total),
+      managerGUID: team2.managers.manager.guid,
+      managerName: team2.managers.manager.nickname,
+    },
+    {
+      points: +(team2.team_points.total),
+      managerGUID: team1.managers.manager.guid,
+      managerName: team1.managers.manager.nickname,
+    },
+  ];
+
+  matchupData.forEach((data) => {
+
+    let existingPointScorerIndex = pointScorers.findIndex(
+      (x) => x.managerGUID === data.managerGUID
+    );
+    if (existingPointScorerIndex === -1) {
+      pointScorers.push(data);
+    } else {
+      pointScorers[existingPointScorerIndex].points +=
+        +data.points;
+    }
+  });
+
+  pointScorers = sortScores("asc", pointScorers);
+  pointScorers = pointScorers.map(x => ({...x, points: +x.points.toFixed(2)}));
+  debugger;
   return pointScorers;
 }

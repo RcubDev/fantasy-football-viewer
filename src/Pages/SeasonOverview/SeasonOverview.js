@@ -5,20 +5,20 @@ import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 import { withRouter } from "react-router-dom";
 import _ from "lodash";
-import { PanelMenu } from "primereact/panelmenu";
+import { Menu } from "primereact/menu";
 import PointsFor from "../SeasonalStatComponents/PointsFor";
 import weeklyScoreboards from "../../data/league/WeeklyScoreboard"
 import leagueInfo from "../../data/league/LeagueInfoData";
 import leagues from "../../data/league/LeaguesData";
 import teams from "../../data/league/Teams";
 import { Button } from "primereact/button";
+import PointsAgainst from "../SeasonalStatComponents/PointsAgainst";
 
 
 
 class SeasonOverview extends React.Component {
   constructor(props) {
     super(props);
-    console.log(this.props?.match?.params?.view);
     this.state = {
       statViewType: this.props?.match?.params?.view ? this.props?.match?.params?.view : "none",
       currentSeasonId: this.props.match.params.seasonId      
@@ -43,7 +43,6 @@ class SeasonOverview extends React.Component {
             label={element.season}
             id={internalLeagueId + element.season + "Button"}
             onClick={() => {
-              console.log(element);
               this.setState({currentSeasonId: element.league_id});
               let path = `/League/${internalLeagueId}/Seasons/${element.league_id}/View/${this.state.statViewType.toLowerCase()}`
               this.props.history.push(path)
@@ -65,7 +64,7 @@ class SeasonOverview extends React.Component {
   
   items = [
     {
-      label: "Top 10",
+      label: "Stats",
       icon: "pi pi-fw pi-file",
       items: [
         {
@@ -86,12 +85,6 @@ class SeasonOverview extends React.Component {
           command: () => {this.setStatView("bench")},
           icon: "pi pi-fw",
         },
-      ],
-    },
-    {
-      label: "# of",
-      icon: "pi pi-fw pi-pencil",
-      items: [
         {
           label: "Wins",
           icon: "pi pi-fw",
@@ -110,10 +103,10 @@ class SeasonOverview extends React.Component {
         {
           label: "Trades",
           icon: "pi pi-fw",
-          command: () => {this.setStatView("PointsFor")},
+          command: () => {this.setStatView("pointsfor")},
         },
       ],
-    },
+    }    
   ];
 
   render() {
@@ -121,7 +114,7 @@ class SeasonOverview extends React.Component {
     let id = this.props.match.params.internalLeagueId;
     return (
       <div style={{display: "flex"}}>
-        <PanelMenu model={this.items} style={{ width: "300px" }} />
+        <Menu model={this.items} style={{ width: "300px" }} />
         <div>
           <div style={{display: "flex", textAlign: "center"}}>
             {this.CreateSeasons(id)}
@@ -134,14 +127,23 @@ class SeasonOverview extends React.Component {
 
   GetStatComponent(statViewType) {
     let seasonLeagueId = this.state.currentSeasonId;
+    let weeksToEvaluate = weeklyScoreboards;
+
     switch(statViewType.toLowerCase()) {
         case "pointsfor":
-            let weeksToEvaluate = weeklyScoreboards;
-            
+            //This is duplicated. Refactor.
             if(this.props.match.params.seasonId !== "All"){
                 weeksToEvaluate = weeksToEvaluate.filter(x => x.leagueId === seasonLeagueId);
             }            
+
             return (<PointsFor stats={weeksToEvaluate}></PointsFor>)
+        case "pointsagainst":          
+
+          if(this.props.match.params.seasonId !== "All"){
+              weeksToEvaluate = weeksToEvaluate.filter(x => x.leagueId === seasonLeagueId);
+          }
+
+          return (<PointsAgainst stats={weeksToEvaluate}></PointsAgainst>)
         case "none":
             return (<div></div>);
     }
