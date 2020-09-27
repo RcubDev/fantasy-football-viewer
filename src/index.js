@@ -1,12 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
 import * as serviceWorker from './serviceWorker';
+import FantasyFootballRouter from './FantasyFootballRouter'
+import LeagueSelector from './Pages/LeagueSelector';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <FantasyFootballRouter />
   </React.StrictMode>,
   document.getElementById('root')
 );
