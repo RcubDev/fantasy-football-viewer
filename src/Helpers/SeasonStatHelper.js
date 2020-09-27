@@ -7,7 +7,7 @@ function LoopMatchups(callBack, maxNumManagers, sortBy, stats) {
 
   stats.forEach((week) => {
     let matchups = week.data.matchups;
-    if (matchups) {
+    if (matchups.length > 0) {
       matchups.forEach((matchup) => {
         matchup.matchup.teams.forEach((team) => {
           let managerData = { ...team.team.managers.manager };
@@ -42,9 +42,10 @@ export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
     //SETUP SEASON TOTAL VIEW.
 
     let scoresDictionary = {};
+    debugger;
     stats.forEach((week) => {
       let matchups = week.data.matchups;
-      if (matchups) {
+      if (matchups.length > 0) {
         matchups.forEach((matchup) => {
           matchup.matchup.teams.forEach((team) => {
             let managerData = { ...team.team.managers.manager };
@@ -90,7 +91,6 @@ function CalculateWeeklyScores(
         managerName: teamManager.nickname,
         week: weekNumber,
       };
-      debugger;
     if(pointScorers[parseInt(weekNumber) - 1]) {
         pointScorers[parseInt(weekNumber) - 1].data.push(newPointScorer);
     }
@@ -99,7 +99,7 @@ function CalculateWeeklyScores(
             week: parseInt(weekNumber),
             data: [newPointScorer]
         })
-    }
+    }        
     return pointScorers;
 }
 

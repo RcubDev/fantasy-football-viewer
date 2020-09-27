@@ -9,15 +9,8 @@ import "./TransitionContainer.css";
 function TransitionContainer({ location }) {
   return (
     <div style={{ width: "100%" }}>
-      <TransitionGroup>
-        <CSSTransition
-          key={location.key}
-          timeout={{ enter: 1000, exit: 1000 }}
-          classNames="fade"
-        >
-          <section className="route-section">
             <Switch location={location}>
-              <Route path="/League/:internalLeagueId/Seasons/:seasonId">
+              <Route path="/League/:internalLeagueId/Seasons/:seasonId/View/:view">
                 <SeasonOverview></SeasonOverview>
               </Route>
               <Route path="/League/:internalLeagueId">
@@ -27,9 +20,6 @@ function TransitionContainer({ location }) {
                 <LeagueSelector></LeagueSelector>
               </Route>
             </Switch>
-          </section>
-        </CSSTransition>
-      </TransitionGroup>
     </div>
   );
 }

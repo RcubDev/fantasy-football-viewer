@@ -8,14 +8,52 @@ import _ from "lodash";
 import { PanelMenu } from "primereact/panelmenu";
 import PointsFor from "../SeasonalStatComponents/PointsFor";
 import weeklyScoreboards from "../../data/league/WeeklyScoreboard"
+import leagueInfo from "../../data/league/LeagueInfoData";
+import leagues from "../../data/league/LeaguesData";
+import teams from "../../data/league/Teams";
+import { Button } from "primereact/button";
+
 
 
 class SeasonOverview extends React.Component {
   constructor(props) {
-    super();
+    super(props);
+    console.log(this.props?.match?.params?.view);
     this.state = {
-      statViewType: "none",
+      statViewType: this.props?.match?.params?.view ? this.props?.match?.params?.view : "none",
+      currentSeasonId: this.props.match.params.seasonId      
     };
+  }
+
+  
+
+  CreateSeasons(internalLeagueId) {
+    let seasonButtons = [];
+    let leagueSeasons = leagues.filter(
+      (y) => y.internalId === parseInt(internalLeagueId)
+    );
+    leagueSeasons = leagueSeasons.map((x) => x.id);
+    let seasons = _.filter(leagueInfo, function (x) {
+      return leagueSeasons.indexOf(x.league_id) > -1;
+    });
+    seasons.forEach((element) => {
+      let result = (
+        <div className="p-col" id={internalLeagueId + element.season + "pCol"}>
+          <Button
+            label={element.season}
+            id={internalLeagueId + element.season + "Button"}
+            onClick={() => {
+              console.log(element);
+              this.setState({currentSeasonId: element.league_id});
+              let path = `/League/${internalLeagueId}/Seasons/${element.league_id}/View/${this.state.statViewType.toLowerCase()}`
+              this.props.history.push(path)
+            }}
+          ></Button>
+        </div>
+      );
+      seasonButtons.push(result);
+    });
+    return seasonButtons;
   }
 
   setStatView(viewType) {
@@ -33,19 +71,19 @@ class SeasonOverview extends React.Component {
         {
           //should be able to have high low options AND options for weekly + season options
           label: "Points For",
-          command: () => {this.setStatView("PointsFor")},
+          command: () => {this.setStatView("pointsfor")},
           icon: "pi pi-fw",
         },
         {
           //should be able to have high low options AND options for weekly + season options
           label: "Points Against",
-          command: () => {this.setStatView("PointsAgainst")},
+          command: () => {this.setStatView("pointsagainst")},
           icon: "pi pi-fw",
         },
         {
           //should be able to have high low options AND options for weekly + season options
           label: "Points On Bench",
-          command: () => {this.setStatView("Bench")},
+          command: () => {this.setStatView("bench")},
           icon: "pi pi-fw",
         },
       ],
@@ -80,16 +118,22 @@ class SeasonOverview extends React.Component {
 
   render() {
     let StatComponent =  this.GetStatComponent(this.state.statViewType);
+    let id = this.props.match.params.internalLeagueId;
     return (
       <div style={{display: "flex"}}>
         <PanelMenu model={this.items} style={{ width: "300px" }} />
-        {StatComponent}
+        <div>
+          <div style={{display: "flex", textAlign: "center"}}>
+            {this.CreateSeasons(id)}
+          </div>
+          {StatComponent}
+        </div>
       </div>
     );
   }
 
   GetStatComponent(statViewType) {
-    let seasonLeagueId = this.props.match.params.seasonId;
+    let seasonLeagueId = this.state.currentSeasonId;
     switch(statViewType.toLowerCase()) {
         case "pointsfor":
             let weeksToEvaluate = weeklyScoreboards;
