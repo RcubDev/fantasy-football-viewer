@@ -13,6 +13,7 @@ import leagues from "../../data/league/LeaguesData";
 import teams from "../../data/league/Teams";
 import { Button } from "primereact/button";
 import PointsAgainst from "../SeasonalStatComponents/PointsAgainst";
+import Wins from "../SeasonalStatComponents/Wins"
 
 
 
@@ -144,6 +145,11 @@ class SeasonOverview extends React.Component {
           }
 
           return (<PointsAgainst stats={weeksToEvaluate}></PointsAgainst>)
+        case "wins":
+          if(this.props.match.params.seasonId !== "All") {
+            weeksToEvaluate = weeksToEvaluate.filter(x => x.leagueId === seasonLeagueId);
+          }
+          return (<Wins stats={weeksToEvaluate}></Wins>)
         case "none":
             return (<div></div>);
     }

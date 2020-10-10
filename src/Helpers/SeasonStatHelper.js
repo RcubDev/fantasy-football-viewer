@@ -69,7 +69,6 @@ export const GetTopPointsFor = (viewType, maxNumManagers, sortBy, stats) => {
             if (managerData.nickname === "--hidden--") {
               managerData.nickname = team.team.name;
             }
-            debugger;
             let newScore = {
               points: +parseFloat(team.team.team_points.total),
               managerGUID: managerData.guid,
@@ -164,7 +163,6 @@ function CalculateTopSingleWeekPointsFor(
   }
   if (newScorerAdded) {
     pointScorers = sortScores(sortBy, pointScorers);
-    console.log(pointScorers);
   }
   return pointScorers;
 }
@@ -190,6 +188,52 @@ export const GetTopPointsAgainst = (
 ) => {
   return LoopMatchupsPassMatchupTeams(GetPointsAgainstSeason, maxNumManagers, sortBy, stats);
 };
+
+export const CalculateWins = (viewType, maxNumManagers, sortBy, stats) => {
+  return LoopMatchupsPassMatchupTeams(CalculateWinsSeason, maxNumManagers, sortBy, stats);
+}
+
+function CalculateWinsSeason(maxNumManagers, sortBy, pointScorers, teams) {
+  let team1 = teams[0].team;
+  let team2 = teams[1].team;
+  let winner;
+  if(team2.team_points.total === "94.34"){
+    debugger;
+  }
+  if(+team1.team_points.total > +team2.team_points.total){
+    winner = team1;
+  }
+  else if(+team2.team_points.total > +team1.team_points.total) {
+    winner = team2;
+  }
+  else {
+    //TIE?
+    winner = null;
+  }
+  
+  if(team1.managers.manager.guid === "CZKBUGJNKCXVECGR2Z5BXC2E7M" || team2.managers.manager.guid === "CZKBUGJNKCXVECGR2Z5BXC2E7M") {
+    console.log("winner:");
+    console.log(winner.managers.manager.nickname);
+    console.log(winner.team_points.total);
+    console.log("team1:");
+    console.log(team1.managers.manager.nickname);
+    console.log("team2:");
+    console.log(team2.managers.manager.nickname);
+  }
+
+  let existingPointScorer = pointScorers.findIndex(x => x.managerGUID === winner.managers.manager.guid);
+  if(existingPointScorer !== -1) {
+    pointScorers[existingPointScorer].data++;
+  }
+  else{
+    pointScorers.push({ 
+      managerGUID: winner.managers.manager.guid,
+      managerName: winner.managers.manager.nickname,
+      data: 1
+     });
+  }
+  return pointScorers;
+}
 
 function GetPointsAgainstSeason(maxNumManagers, sortBy, pointScorers, teams) {
   //ALL MATCHUPS SHOULD HAVE 2 TEAMS ONLY.
@@ -224,6 +268,5 @@ function GetPointsAgainstSeason(maxNumManagers, sortBy, pointScorers, teams) {
 
   pointScorers = sortScores("asc", pointScorers);
   pointScorers = pointScorers.map(x => ({...x, points: +x.points.toFixed(2)}));
-  debugger;
   return pointScorers;
 }
